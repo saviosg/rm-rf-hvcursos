@@ -104,9 +104,9 @@ pub async fn update<D>(mut req: Request, ctx: RouteContext<D>) -> Result<Respons
         None => return Response::ok(""),
     };
     let user = chat_member.new_chat_member.user;
-    let name = user.first_name.clone() + match &(user.last_name) { Some(str) => str, None => "", };
+    let name = (user.first_name.clone() + match &(user.last_name) { Some(str) => str, None => "", }).to_lowercase();
     let not_me = !name.contains("rm -rf");
-    if not_me && name.contains("HV Cursos") {
+    if not_me && name.contains(&"HV CURSOS".to_lowercase()) {
         let token = match ctx.secret("BOT_TOKEN") {
             Ok(token) => token.to_string(),
             Err(_) => return Response::error("BOT_TOKEN not set", 500),

@@ -1,0 +1,30 @@
+name = "your-worker"
+type = "javascript"
+account_id = "your-account-id"
+compatibility_date = "2022-01-10"
+
+# This field specifies that the Worker
+# will be deployed to a *.workers.dev domain
+workers_dev = true
+
+[vars]
+TELEGRAM_URL = "https://api.telegram.org/bot"
+WORKERS_RS_VERSION = "0.0.7"
+
+# don't uncomment the lines below
+# this is merely a reminder
+# [secrets]
+# BOT_TOKEN
+# WORKER_URL
+
+[build]
+command = "cargo install -q worker-build && worker-build --release" # required
+
+[build.upload]
+dir    = "build/worker"
+format = "modules"
+main   = "./shim.mjs"
+
+[[build.upload.rules]]
+globs = ["**/*.wasm"]
+type  = "CompiledWasm"

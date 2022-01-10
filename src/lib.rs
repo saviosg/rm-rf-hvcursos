@@ -57,8 +57,8 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
         Err(_) => return Response::error("BOT_TOKEN not set", 500),
     };
     router
-        .get_async(&token, set_webhook)
-        .post_async(&token, update)
+        .get_async(&(String::from("/") + &token), set_webhook)
+        .post_async(&(String::from("/") + &token), update)
         .run(req, env).await
 }
 

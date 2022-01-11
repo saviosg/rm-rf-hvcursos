@@ -105,8 +105,7 @@ pub async fn update<D>(mut req: Request, ctx: RouteContext<D>) -> Result<Respons
     };
     let user = chat_member.new_chat_member.user;
     let name = (user.first_name.clone() + match &(user.last_name) { Some(str) => str, None => "", }).to_lowercase();
-    let not_me = !name.contains("rm -rf");
-    if not_me && name.contains(&"HV CURSOS".to_lowercase()) {
+    if is_name_banned(&name, "rm -rf HV CURSOS") {
         let token = match ctx.secret("BOT_TOKEN") {
             Ok(token) => token.to_string(),
             Err(_) => return Response::error("BOT_TOKEN not set", 500),
@@ -132,4 +131,19 @@ async fn ban_chat_member(user: &User, chat: &Chat, api_url: &str) -> Result<Resp
         Ok(_) => Response::ok(""),
         Err(_) => Response::error("", 500),
     }
+}
+
+fn is_name_banned(name: &str, bot_name: &str) -> bool {
+    let lowercase_name = name.to_lowercase();
+    let is_me = lowercase_name.eq(&bot_name.to_lowercase());
+    if is_me {
+        return false;
+    }
+    let banned_names = ["HV CURSOS", "Hadassa CURSOS"];
+    for banned in banned_names {
+        if lowercase_name.eq(&banned.to_lowercase()) {
+            return true;
+        }
+    }
+    return false;
 }

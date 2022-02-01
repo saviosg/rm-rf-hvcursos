@@ -139,7 +139,7 @@ fn is_name_banned(name: &str, bot_name: &str) -> bool {
     if is_me {
         return false;
     }
-    let banned_names = ["HV CURSOS", "Hadassa CURSOS"];
+    let banned_names = ["HV CURSOS", "Hadassa CURSOS", "Hadassa HV"];
     for banned in banned_names {
         if lowercase_name.eq(&banned.to_lowercase()) {
             return true;

@@ -104,7 +104,7 @@ pub async fn update<D>(mut req: Request, ctx: RouteContext<D>) -> Result<Respons
         None => return Response::ok(""),
     };
     let user = chat_member.new_chat_member.user;
-    let name = (user.first_name.clone() + match &(user.last_name) { Some(str) => str, None => "", }).to_lowercase();
+    let name = match &user.last_name { Some(str) => [&user.first_name, " ", str].concat(), None => user.first_name.clone() };
     if is_name_banned(&name, "rm -rf HV CURSOS") {
         let token = match ctx.secret("BOT_TOKEN") {
             Ok(token) => token.to_string(),

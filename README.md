@@ -1,4 +1,6 @@
-# O que é isso?
+# rm -rf HV CURSOS
+
+## O que é isso?
 
 É um bot para Telegram que bane ao entrar em um grupo qualquer conta com o nome
 "HV Cursos", que é famosa por causar spam ao entrar muitas vezes num mesmo
@@ -73,25 +75,35 @@ estado compartilhado em instâncias por solicitações diferentes.
   
   Digite o comando e pressione Enter para inserir o valor.
 
-  ```bash wrangler secret put BOT_TOKEN``` token obtido ao criar o bot no
+  ```bash
+    wrangler secret put BOT_TOKEN
+  ```
+
+  token obtido ao criar o bot no
   Telegram
 
-  ```bash wrangler secret put WORKER_URL``` URL de acordo com chave **name**
+  ```bash
+    wrangler secret put WORKER_URL
+  ```
+
+  URL de acordo com chave **name**
   definida no arquivo wrangler.toml, ex:
-  ```https://name.seu-subdominio.workers.dev```
+  `https://name.seu-subdominio.workers.dev`
 
   Depois, é necessário adicionar mais dois secrets. Um para o caminho de
   definição da webhook (WEBHOOK_SECRET) e outro
   para o caminho de envio de atualizações (UPDATE_SECRET).
   É recomendável que use números pseudoaleatórios criptograficamente seguros
-  de pelo menos 256 bits, que podem ser gerados utilizando o comando ```od -vAn
-  -N32 -t x1 < /dev/urandom | tr -d ' \n'; echo``` ou, se possuir o openssl
-  instalado, com ```openssl rand --hex 32```. Você pode usar o mesmo valor para
+  de pelo menos 256 bits, que podem ser gerados utilizando o comando
+  `od -vAn -N32 -t x1 < /dev/urandom | tr -d ' \n'; echo` ou, se possuir o openssl
+  instalado, com `openssl rand --hex 32`. Você pode usar o mesmo valor para
   os dois secrets, mas recomendo que utilize valores diferentes.
 
 ## Publicar o código
 
-  ```bash wrangler publish```
+  ```bash
+    wrangler publish
+  ```
 
 ## Configurar webhook
 

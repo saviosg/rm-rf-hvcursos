@@ -52,24 +52,30 @@ pub async fn main(req: Request, env: Env) -> Result<Response> {
 
     let router = Router::new();
 
-    let token = match env.secret("BOT_TOKEN") {
-        Ok(token) => token.to_string(),
-        Err(_) => return Response::error("BOT_TOKEN not set", 500),
-    };
     router
-        .get_async(&(String::from("/") + &token), set_webhook)
-        .post_async(&(String::from("/") + &token), update)
+        .post_async("/webhook/:webhook_secret", set_webhook)
+        .post_async("/update/:update_secret", update)
         .run(req, env).await
 }
 
 pub async fn set_webhook<D>(_req: Request, ctx: RouteContext<D>) -> Result<Response> {
+    match ctx.param_equals_secret("webhook_secret", "WEBHOOK_SECRET") {
+        Ok(equal) => if !equal {
+            return Ok(Response::empty()?.with_status(404));
+        },
+        Err(e) => return Response::error(e, 500),
+    };
     let client = reqwest::Client::new();
     let bot_token = match ctx.secret("BOT_TOKEN") {
         Ok(token) => token.to_string(),
         Err(_) => return Response::error("BOT_TOKEN not set", 500),
     };
+    let update_secret = match ctx.secret("UPDATE_SECRET") {
+        Ok(secret) => secret.to_string(),
+        Err(_) => return Response::error("UPDATE_SECRET not set", 500),
+    };
     let webhook_url = match ctx.secret("WORKER_URL") {
-        Ok(url) => url.to_string() + "/" + &bot_token,
+        Ok(url) => url.to_string() + "/update/" + &update_secret,
         Err(_) => return Response::error("WORKER_URL not set", 500),
     };
     let data = SetWebhook { url: &webhook_url, allowed_updates: ["chat_member"] };
@@ -92,6 +98,18 @@ pub async fn set_webhook<D>(_req: Request, ctx: RouteContext<D>) -> Result<Respo
 }
 
 pub async fn update<D>(mut req: Request, ctx: RouteContext<D>) -> Result<Response> {
+    let telegram_asn = 62041;
+    // make sure request is coming from Telegram
+    if req.cf().asn() != telegram_asn {
+        return Ok(Response::empty()?.with_status(403));
+    }
+    match ctx.param_equals_secret("update_secret", "UPDATE_SECRET") {
+        Ok(equal) => if !equal {
+            return Ok(Response::empty()?.with_status(404));
+        },
+        Err(e) => return Response::error(e, 500),
+    };
+
     let update: Update = match req.text().await {
         Ok(txt) => match serde_json::from_str(&txt) {
             Ok(data) => data,
@@ -146,4 +164,21 @@ fn is_name_banned(name: &str, bot_name: &str) -> bool {
         }
     }
     return false;
+}
+
+trait ParamSecretComparison {
+    fn param_equals_secret(&self, param_name: &str, secret_name: &str) -> std::result::Result<bool, String>;
+}
+
+impl<D> ParamSecretComparison for RouteContext<D> {
+    fn param_equals_secret(&self, param_name: &str, secret_name: &str) -> std::result::Result<bool, String> {
+        let param = match self.param(param_name) {
+            Some(p) => p,
+            None => return Err(format!("param {} not found", param_name)),
+        };
+        match self.secret(secret_name) {
+            Ok(secret) => Ok(&secret.to_string() == param),
+            Err(_) => Err(format!("secret {} not found", secret_name)),
+        }
+    }
 }

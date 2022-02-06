@@ -12,8 +12,9 @@ TELEGRAM_URL = "https://api.telegram.org/bot"
 WORKERS_RS_VERSION = "0.0.7"
 
 # don't uncomment the lines below
-# this is merely a reminder
 # [secrets]
+# WEBHOOK_SECRET
+# UPDATE_SECRET
 # BOT_TOKEN
 # WORKER_URL
 
